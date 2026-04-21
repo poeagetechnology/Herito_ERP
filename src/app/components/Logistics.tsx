@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import {
-  Truck,
   MapPin,
   Route,
   Clock,
@@ -101,9 +100,11 @@ export function Logistics() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button 
+          <button
             onClick={() => {
-              alert('Route optimization algorithm will run. This feature is being developed.');
+              alert(
+                "Route optimization algorithm will run. This feature is being developed.",
+              );
               // TODO: Implement route optimization
             }}
             className="px-6 py-3 rounded-2xl font-medium bg-white border border-gray-200 text-gray-700 hover:border-orange-500 transition-all hover:shadow-md"
@@ -112,7 +113,9 @@ export function Logistics() {
           </button>
           <button
             onClick={() => {
-              alert('Dispatch Van form will open. This feature is being developed.');
+              alert(
+                "Dispatch Van form will open. This feature is being developed.",
+              );
               // TODO: Implement dispatch van form
             }}
             className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"

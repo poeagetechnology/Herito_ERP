@@ -92,8 +92,12 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
       </nav>
 
       <div className="p-4 border-t border-gray-200/50">
-        <button 
-          onClick={() => alert('Settings panel coming soon. Contact administrator for system configuration.')}
+        <button
+          onClick={() =>
+            alert(
+              "Settings panel coming soon. Contact administrator for system configuration.",
+            )
+          }
           className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-100/50 transition-all"
         >
           <Settings className="w-5 h-5" />

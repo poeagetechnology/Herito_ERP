@@ -1,34 +1,34 @@
-import { useState, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
-import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './components/Dashboard';
-import { InventoryHub } from './components/InventoryHub';
-import { OutletMap } from './components/OutletMap';
-import { OrderPipeline } from './components/OrderPipeline';
-import { SalesPerformance } from './components/SalesPerformance';
-import { Logistics } from './components/Logistics';
-import { MobileView } from './components/MobileView';
-import { useDataContext } from '../lib/dataContext';
+import { useState, useEffect } from "react";
+import { AlertCircle } from "lucide-react";
+import { Sidebar } from "./components/Sidebar";
+import { Dashboard } from "./components/Dashboard";
+import { InventoryHub } from "./components/InventoryHub";
+import { OutletMap } from "./components/OutletMap";
+import { OrderPipeline } from "./components/OrderPipeline";
+import { SalesPerformance } from "./components/SalesPerformance";
+import { Logistics } from "./components/Logistics";
+import { MobileView } from "./components/MobileView";
+import { useDataContext } from "../lib/dataContext";
 
 export default function App() {
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, setActiveView] = useState("dashboard");
   const { error: contextError } = useDataContext();
 
   const renderView = () => {
     switch (activeView) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard />;
-      case 'inventory':
+      case "inventory":
         return <InventoryHub />;
-      case 'outlets':
+      case "outlets":
         return <OutletMap />;
-      case 'orders':
+      case "orders":
         return <OrderPipeline />;
-      case 'performance':
+      case "performance":
         return <SalesPerformance />;
-      case 'logistics':
+      case "logistics":
         return <Logistics />;
-      case 'mobile':
+      case "mobile":
         return <MobileView />;
       default:
         return <Dashboard />;
@@ -53,9 +53,7 @@ export default function App() {
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
       <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          {renderView()}
-        </div>
+        <div className="p-8">{renderView()}</div>
       </main>
     </div>
   );

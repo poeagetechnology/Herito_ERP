@@ -17,26 +17,28 @@ const firebaseConfig = {
 // Validate Firebase configuration
 const validateFirebaseConfig = () => {
   const requiredFields = [
-    'apiKey',
-    'authDomain',
-    'projectId',
-    'storageBucket',
-    'messagingSenderId',
-    'appId',
+    "apiKey",
+    "authDomain",
+    "projectId",
+    "storageBucket",
+    "messagingSenderId",
+    "appId",
   ];
 
   const missingFields = requiredFields.filter(
-    (field) => !firebaseConfig[field as keyof typeof firebaseConfig]
+    (field) => !firebaseConfig[field as keyof typeof firebaseConfig],
   );
 
   if (missingFields.length > 0) {
     console.error(
-      'Firebase Configuration Error: Missing required environment variables:',
-      missingFields
+      "Firebase Configuration Error: Missing required environment variables:",
+      missingFields,
     );
-    console.log('Please ensure .env.local file contains all Firebase credentials');
+    console.log(
+      "Please ensure .env.local file contains all Firebase credentials",
+    );
     throw new Error(
-      `Firebase config incomplete. Missing: ${missingFields.join(', ')}`
+      `Firebase config incomplete. Missing: ${missingFields.join(", ")}`,
     );
   }
 
@@ -47,7 +49,7 @@ const validateFirebaseConfig = () => {
 try {
   validateFirebaseConfig();
 } catch (error) {
-  console.error('Firebase initialization failed:', error);
+  console.error("Firebase initialization failed:", error);
   throw error;
 }
 
@@ -66,9 +68,9 @@ try {
     getAnalytics(app);
   }
 
-  console.log('Firebase initialized successfully');
+  console.log("Firebase initialized successfully");
 } catch (error) {
-  console.error('Firebase initialization error:', error);
+  console.error("Firebase initialization error:", error);
   throw error;
 }
 

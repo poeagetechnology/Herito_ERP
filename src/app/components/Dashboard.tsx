@@ -217,8 +217,8 @@ export function Dashboard() {
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-xl text-gray-900">Recent Alerts</h3>
-          <button 
-            onClick={() => alert('View all alerts feature coming soon')}
+          <button
+            onClick={() => alert("View all alerts feature coming soon")}
             className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
           >
             View All
@@ -238,7 +238,7 @@ export function Dashboard() {
                   <p className="font-medium text-gray-900">{alert.title}</p>
                   <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => {
                     alert(`Alert: ${alert.title}\n\n${alert.message}`);
                   }}

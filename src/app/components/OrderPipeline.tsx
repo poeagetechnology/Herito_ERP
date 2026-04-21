@@ -93,7 +93,9 @@ export function OrderPipeline() {
           </div>
           <button
             onClick={() => {
-              alert('New Order form will open here. This feature is being developed.');
+              alert(
+                "New Order form will open here. This feature is being developed.",
+              );
               // TODO: Implement new order form/modal
             }}
             className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"

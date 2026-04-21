@@ -55,22 +55,22 @@ export function InventoryHub() {
         <button
           onClick={() => {
             // Generate CSV report of inventory
-            const inventoryReport = state.inventory.map(item => ({
+            const inventoryReport = state.inventory.map((item) => ({
               Flavor: item.flavor,
               Stock: item.stock,
               Capacity: item.capacity,
-              Level: ((item.stock / item.capacity) * 100).toFixed(1) + '%',
-              Trend: item.trend + '%'
+              Level: ((item.stock / item.capacity) * 100).toFixed(1) + "%",
+              Trend: item.trend + "%",
             }));
             const csvContent = [
-              Object.keys(inventoryReport[0]).join(','),
-              ...inventoryReport.map(row => Object.values(row).join(','))
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv' });
+              Object.keys(inventoryReport[0]).join(","),
+              ...inventoryReport.map((row) => Object.values(row).join(",")),
+            ].join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv" });
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = `inventory-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `inventory-report-${new Date().toISOString().split("T")[0]}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
           }}

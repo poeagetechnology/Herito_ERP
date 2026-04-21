@@ -192,8 +192,8 @@ export function MobileView() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-xl text-gray-900">Today's Route</h3>
-            <button 
-              onClick={() => alert('Route optimization running...')}
+            <button
+              onClick={() => alert("Route optimization running...")}
               className="px-4 py-2 rounded-xl bg-orange-50 text-orange-600 font-medium hover:bg-orange-100 transition-all"
             >
               Optimize
@@ -263,7 +263,9 @@ export function MobileView() {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => alert(`Quick order for ${outlet.name} created!`)}
+                      onClick={() =>
+                        alert(`Quick order for ${outlet.name} created!`)
+                      }
                       className="flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 hover:shadow-lg"
                       style={{
                         background:
@@ -275,8 +277,10 @@ export function MobileView() {
                       <Zap className="w-4 h-4" />
                       Quick Order
                     </button>
-                    <button 
-                      onClick={() => alert(`Custom order form opening for ${outlet.name}`)}
+                    <button
+                      onClick={() =>
+                        alert(`Custom order form opening for ${outlet.name}`)
+                      }
                       className="flex-1 py-3 rounded-xl font-medium bg-white border-2 border-gray-200 text-gray-700 hover:border-orange-500 transition-all flex items-center justify-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
