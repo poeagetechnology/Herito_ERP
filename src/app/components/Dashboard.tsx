@@ -255,9 +255,52 @@ export function Dashboard() {
           </p>
         )}
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        <a
+          href="#inventory"
+          className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer text-decoration-none"
+          style={{
+            background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+          }}
+        >
+          <div className="text-white">
+            <Package className="w-8 h-8 mb-3" />
+            <h3 className="font-bold text-lg">Manage Inventory</h3>
+            <p className="text-sm text-white/80 mt-2">Add products & update stock levels</p>
+          </div>
+        </a>
+
+        <a
+          href="#orders"
+          className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer"
+          style={{
+            background: "linear-gradient(135deg, #2ECC71 0%, #6EE7B7 100%)",
+          }}
+        >
+          <div className="text-white">
+            <DollarSign className="w-8 h-8 mb-3" />
+            <h3 className="font-bold text-lg">Create Orders</h3>
+            <p className="text-sm text-white/80 mt-2">Place new orders from outlets</p>
+          </div>
+        </a>
+
+        <a
+          href="#logistics"
+          className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer"
+          style={{
+            background: "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
+          }}
+        >
+          <div className="text-white">
+            <Truck className="w-8 h-8 mb-3" />
+            <h3 className="font-bold text-lg">Manage Logistics</h3>
+            <p className="text-sm text-white/80 mt-2">Dispatch vans & track deliveries</p>
+          </div>
+        </a>
+      </div>
     </div>
-  );
-}
+  );\n\n        <aa\n          href=\"#orders\"\n          className=\"rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer\"\n          style={{\n            background: \"linear-gradient(135deg, #2ECC71 0%, #6EE7B7 100%)\",\n          }}\n        >\n          <div className=\"text-white\">\n            <DollarSign className=\"w-8 h-8 mb-3\" />\n            <h3 className=\"font-bold text-lg\">Create Orders</h3>\n            <p className=\"text-sm text-white/80 mt-2\">Place new orders from outlets</p>\n          </div>\n        </a>\n\n        <a\n          href=\"#logistics\"\n          className=\"rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer\"\n          style={{\n            background: \"linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)\",\n          }}\n        >\n          <div className=\"text-white\">\n            <Truck className=\"w-8 h-8 mb-3\" />\n            <h3 className=\"font-bold text-lg\">Manage Logistics</h3>\n            <p className=\"text-sm text-white/80 mt-2\">Dispatch vans & track deliveries</p>\n          </div>\n        </a>\n      </div>\n    </div>\n  );\n}
 
 // Helper functions
 function getIconForStat(label: string) {
