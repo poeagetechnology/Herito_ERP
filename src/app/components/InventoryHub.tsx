@@ -1,10 +1,30 @@
-import { useEffect } from "react";
-import { AlertTriangle, TrendingUp, Package, Loader } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AlertTriangle, TrendingUp, Package, Loader, X } from "lucide-react";
 import { useDataContext } from "../../lib/dataContext";
 import type { InventoryItem } from "../../lib/types";
 
 export function InventoryHub() {
-  const { state, loading, error, refreshInventory } = useDataContext();
+  const {
+    state,
+    loading,
+    error,
+    refreshInventory,
+    addInventoryItem,
+    updateInventoryItem,
+  } = useDataContext();
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showUpdateStock, setShowUpdateStock] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [newProduct, setNewProduct] = useState({
+    flavor: "",
+    stock: 0,
+    capacity: 1000,
+    color: "#FF8A00",
+    gradient: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+    icon: "🧋",
+    trend: 0,
+  });
+  const [stockUpdate, setStockUpdate] = useState({ quantity: 0 });
 
   useEffect(() => {
     refreshInventory();
@@ -52,36 +72,270 @@ export function InventoryHub() {
             Real-time stock levels across all flavors
           </p>
         </div>
-        <button
-          onClick={() => {
-            // Generate CSV report of inventory
-            const inventoryReport = state.inventory.map((item) => ({
-              Flavor: item.flavor,
-              Stock: item.stock,
-              Capacity: item.capacity,
-              Level: ((item.stock / item.capacity) * 100).toFixed(1) + "%",
-              Trend: item.trend + "%",
-            }));
-            const csvContent = [
-              Object.keys(inventoryReport[0]).join(","),
-              ...inventoryReport.map((row) => Object.values(row).join(",")),
-            ].join("\n");
-            const blob = new Blob([csvContent], { type: "text/csv" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `inventory-report-${new Date().toISOString().split("T")[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-          }}
-          className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
-          style={{
-            background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
-          }}
-        >
-          Generate Report
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowAddProduct(true)}
+            className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+            }}
+          >
+            Add Product
+          </button>
+          <button
+            onClick={() => {
+              // Generate CSV report of inventory
+              const inventoryReport = state.inventory.map((item) => ({
+                Flavor: item.flavor,
+                Stock: item.stock,
+                Capacity: item.capacity,
+                Level: ((item.stock / item.capacity) * 100).toFixed(1) + "%",
+                Trend: item.trend + "%",
+              }));
+              const csvContent = [
+                Object.keys(inventoryReport[0]).join(","),
+                ...inventoryReport.map((row) => Object.values(row).join(",")),
+              ].join("\n");
+              const blob = new Blob([csvContent], { type: "text/csv" });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `inventory-report-${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }}
+            className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+            }}
+          >
+            Generate Report
+          </button>
+        </div>
       </div>
+
+      {showAddProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Add New Product
+              </h3>
+              <button
+                onClick={() => setShowAddProduct(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name (Flavor)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Mango Fusion"
+                  value={newProduct.flavor}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, flavor: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Initial Stock (cases)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={newProduct.stock}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      stock: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Storage Capacity (cases)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newProduct.capacity}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      capacity: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Icon/Emoji
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., 🧋"
+                  value={newProduct.icon}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, icon: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  maxLength={2}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color
+                </label>
+                <input
+                  type="color"
+                  value={newProduct.color}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, color: e.target.value })
+                  }
+                  className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddProduct(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!newProduct.flavor) {
+                    alert("Please enter product name");
+                    return;
+                  }
+                  try {
+                    await addInventoryItem({
+                      flavor: newProduct.flavor,
+                      stock: newProduct.stock,
+                      capacity: newProduct.capacity,
+                      color: newProduct.color,
+                      gradient: `linear-gradient(135deg, ${newProduct.color} 0%, ${newProduct.color}99 100%)`,
+                      icon: newProduct.icon,
+                      trend: 0,
+                    });
+                    alert("Product added successfully!");
+                    setShowAddProduct(false);
+                    setNewProduct({
+                      flavor: "",
+                      stock: 0,
+                      capacity: 1000,
+                      color: "#FF8A00",
+                      gradient:
+                        "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+                      icon: "🧋",
+                      trend: 0,
+                    });
+                  } catch (err) {
+                    alert("Error adding product. Please try again.");
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                Add Product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUpdateStock && selectedItemId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Update Stock Level
+              </h3>
+              <button
+                onClick={() => setShowUpdateStock(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-4">
+                  Product:{" "}
+                  <span className="font-bold">
+                    {
+                      state.inventory.find((i) => i.id === selectedItemId)
+                        ?.flavor
+                    }
+                  </span>
+                </p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  New Stock Quantity (cases)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={stockUpdate.quantity}
+                  onChange={(e) =>
+                    setStockUpdate({ quantity: parseInt(e.target.value) })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Enter new stock level"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowUpdateStock(false);
+                  setSelectedItemId(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (selectedItemId) {
+                    try {
+                      await updateInventoryItem(selectedItemId, {
+                        stock: stockUpdate.quantity,
+                      });
+                      alert("Stock updated successfully!");
+                      setShowUpdateStock(false);
+                      setSelectedItemId(null);
+                      setStockUpdate({ quantity: 0 });
+                    } catch (err) {
+                      alert("Error updating stock. Please try again.");
+                    }
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                Update Stock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {state.inventory.length === 0 ? (
         <div
@@ -191,7 +445,12 @@ export function InventoryHub() {
                     <span>24 units/case</span>
                   </div>
                   <button
-                    className="text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      setSelectedItemId(item.id);
+                      setStockUpdate({ quantity: item.stock });
+                      setShowUpdateStock(true);
+                    }}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all"
                     style={{ color: item.color }}
                   >
                     Restock

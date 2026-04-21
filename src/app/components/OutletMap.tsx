@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
-import { MapPin, Store, Clock, DollarSign, Loader } from "lucide-react";
+import { MapPin, Store, Clock, DollarSign, Loader, X } from "lucide-react";
 import { useDataContext } from "../../lib/dataContext";
 import type { Outlet } from "../../lib/types";
 
 export function OutletMap() {
-  const { state, loading, error, refreshOutlets } = useDataContext();
+  const { state, loading, error, refreshOutlets, addOutlet } = useDataContext();
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+  const [showAddOutlet, setShowAddOutlet] = useState(false);
+  const [newOutlet, setNewOutlet] = useState({
+    name: "",
+    location: { x: 50, y: 50 },
+    salesVolume: "medium" as const,
+    nextDelivery: "",
+    coolerCapacity: 500,
+    currentStock: 0,
+    owedAmount: 0,
+    phone: "",
+    email: "",
+    address: "",
+  });
 
   useEffect(() => {
     refreshOutlets();
@@ -67,6 +80,15 @@ export function OutletMap() {
             Track customer locations and delivery schedules
           </p>
         </div>
+        <button
+          onClick={() => setShowAddOutlet(true)}
+          className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
+          style={{
+            background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
+          }}
+        >
+          Add Outlet
+        </button>
         <div className="flex gap-3">
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50">
             <div className="w-3 h-3 rounded-full bg-green-500" />
@@ -82,6 +104,172 @@ export function OutletMap() {
           </div>
         </div>
       </div>
+
+      {showAddOutlet && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Add New Outlet
+              </h3>
+              <button
+                onClick={() => setShowAddOutlet(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Outlet Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Downtown Store"
+                  value={newOutlet.name}
+                  onChange={(e) =>
+                    setNewOutlet({ ...newOutlet, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="Street address"
+                  value={newOutlet.address}
+                  onChange={(e) =>
+                    setNewOutlet({ ...newOutlet, address: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Contact number"
+                  value={newOutlet.phone}
+                  onChange={(e) =>
+                    setNewOutlet({ ...newOutlet, phone: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sales Volume
+                </label>
+                <select
+                  value={newOutlet.salesVolume}
+                  onChange={(e) =>
+                    setNewOutlet({
+                      ...newOutlet,
+                      salesVolume: e.target.value as any,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cooler Capacity (cases)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newOutlet.coolerCapacity}
+                  onChange={(e) =>
+                    setNewOutlet({
+                      ...newOutlet,
+                      coolerCapacity: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Next Delivery
+                </label>
+                <input
+                  type="date"
+                  value={newOutlet.nextDelivery}
+                  onChange={(e) =>
+                    setNewOutlet({ ...newOutlet, nextDelivery: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddOutlet(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!newOutlet.name) {
+                    alert("Please enter outlet name");
+                    return;
+                  }
+                  try {
+                    await addOutlet({
+                      name: newOutlet.name,
+                      location: newOutlet.location,
+                      salesVolume: newOutlet.salesVolume,
+                      nextDelivery: newOutlet.nextDelivery,
+                      coolerCapacity: newOutlet.coolerCapacity,
+                      currentStock: newOutlet.currentStock,
+                      owedAmount: newOutlet.owedAmount,
+                      phone: newOutlet.phone,
+                      address: newOutlet.address,
+                    });
+                    alert("Outlet added successfully!");
+                    setShowAddOutlet(false);
+                    setNewOutlet({
+                      name: "",
+                      location: { x: 50, y: 50 },
+                      salesVolume: "medium",
+                      nextDelivery: "",
+                      coolerCapacity: 500,
+                      currentStock: 0,
+                      owedAmount: 0,
+                      phone: "",
+                      email: "",
+                      address: "",
+                    });
+                  } catch (err) {
+                    alert("Error adding outlet. Please try again.");
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                Add Outlet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div
