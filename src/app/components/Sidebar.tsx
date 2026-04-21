@@ -8,6 +8,9 @@ import {
   Users,
   Settings,
   Bell,
+  Boxes,
+  FileText,
+  AlertCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -23,6 +26,11 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
     { id: "orders", icon: ClipboardList, label: "Order Pipeline" },
     { id: "performance", icon: TrendingUp, label: "Sales Performance" },
     { id: "logistics", icon: Truck, label: "Logistics" },
+    { divider: true },
+    { id: "products", icon: Boxes, label: "Product Management" },
+    { id: "deliveries", icon: AlertCircle, label: "Delivery Tracking" },
+    { id: "billing", icon: FileText, label: "Billing & Invoices" },
+    { divider: true },
     { id: "mobile", icon: Users, label: "Field Agents" },
   ];
 
@@ -60,8 +68,14 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1">
-        {menuItems.map((item) => {
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+        {menuItems.map((item: any, index) => {
+          if (item.divider) {
+            return (
+              <div key={index} className="my-2 border-t border-gray-200/50" />
+            );
+          }
+
           const Icon = item.icon;
           const isActive = activeView === item.id;
 

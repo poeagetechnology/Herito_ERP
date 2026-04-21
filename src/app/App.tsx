@@ -7,6 +7,9 @@ import { OutletMap } from "./components/OutletMap";
 import { OrderPipeline } from "./components/OrderPipeline";
 import { SalesPerformance } from "./components/SalesPerformance";
 import { Logistics } from "./components/Logistics";
+import { OutletDeliveryTracking } from "./components/OutletDeliveryTracking";
+import { ProductManagement } from "./components/ProductManagement";
+import { Billing } from "./components/Billing";
 import { MobileView } from "./components/MobileView";
 import { useDataContext } from "../lib/dataContext";
 
@@ -28,6 +31,12 @@ export default function App() {
         return <SalesPerformance />;
       case "logistics":
         return <Logistics />;
+      case "deliveries":
+        return <OutletDeliveryTracking />;
+      case "products":
+        return <ProductManagement />;
+      case "billing":
+        return <Billing />;
       case "mobile":
         return <MobileView />;
       default:

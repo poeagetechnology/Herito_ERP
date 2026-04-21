@@ -43,10 +43,34 @@ export interface InventoryItem {
   lastUpdated?: string;
 }
 
+// Product Types (with multiple pricing)
+export interface Product {
+  id: string;
+  name: string;
+  flavor?: string;
+  sku: string;
+  category: string;
+  costPrice: number;
+  dealerPrice: number;
+  outletPrice: number;
+  mroPrice?: number;
+  customPrice?: number;
+  stock: number;
+  capacity: number;
+  color: string;
+  icon: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Order Types
 export interface OrderItem {
   product: string;
+  productId?: string;
   quantity: number;
+  unitPrice: number;
+  totalPrice: number;
 }
 
 export type OrderStatus = "placed" | "packing" | "transit" | "delivered";
@@ -57,11 +81,50 @@ export interface Order {
   outletName: string;
   status: OrderStatus;
   items: OrderItem[];
+  subtotal: number;
+  tax: number;
   total: number;
   time: string;
   assignedDriver?: string;
+  deliveryDate?: string;
+  deliveryNotes?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// Outlet Delivery Tracking
+export interface OutletDelivery {
+  id: string;
+  outletId: string;
+  outletName: string;
+  orderId: string;
+  deliveryDate: string;
+  casesDelivered: number;
+  weight?: number;
+  amount: number;
+  driver?: string;
+  status: "pending" | "delivered" | "partial";
+  notes?: string;
+  createdAt?: string;
+}
+
+// Invoice/Billing
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  outletId: string;
+  outletName: string;
+  orderId: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax: number;
+  discount?: number;
+  total: number;
+  issueDate: string;
+  dueDate?: string;
+  status: "draft" | "issued" | "paid" | "overdue";
+  notes?: string;
+  createdAt?: string;
 }
 
 export interface OrderStage {
@@ -136,8 +199,11 @@ export interface DashboardData {
 export interface AppState {
   dashboardData: DashboardData | null;
   inventory: InventoryItem[];
+  products: Product[];
   orders: Order[];
   outlets: Outlet[];
+  outletDeliveries: OutletDelivery[];
+  invoices: Invoice[];
   salesReps: SalesRep[];
   vans: DeliveryVan[];
   loading: boolean;

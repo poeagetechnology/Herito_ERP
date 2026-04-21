@@ -16,8 +16,7 @@ export function OrderPipeline() {
   const [showNewOrderForm, setShowNewOrderForm] = useState(false);
   const [formData, setFormData] = useState({
     outletName: "",
-    items: [""],
-    quantities: [1],
+    items: [{ product: "", productId: "", quantity: 1, unitPrice: 0 }],
   });
 
   useEffect(() => {
@@ -146,40 +145,87 @@ export function OrderPipeline() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Items & Quantities
+                      Items & Pricing
                     </label>
                     {formData.items.map((item, index) => (
-                      <div key={index} className="flex gap-2 mb-2">
-                        <input
-                          type="text"
-                          placeholder="Product"
-                          value={item}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index] = e.target.value;
-                            setFormData({ ...formData, items: newItems });
-                          }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                        <input
-                          type="number"
-                          min="1"
-                          value={formData.quantities[index]}
-                          onChange={(e) => {
-                            const newQties = [...formData.quantities];
-                            newQties[index] = parseInt(e.target.value);
-                            setFormData({ ...formData, quantities: newQties });
-                          }}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
+                      <div
+                        key={index}
+                        className="mb-3 p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div className="flex gap-2 mb-2">
+                          <select
+                            value={item.product}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = {
+                                ...item,
+                                product: e.target.value,
+                              };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          >
+                            <option value="">Select product</option>
+                            {state.inventory.map((inv) => (
+                              <option key={inv.id} value={inv.flavor}>
+                                {inv.flavor}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="Qty"
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = {
+                                ...item,
+                                quantity: parseInt(e.target.value) || 1,
+                              };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Unit Price"
+                            value={item.unitPrice}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = {
+                                ...item,
+                                unitPrice: parseFloat(e.target.value) || 0,
+                              };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                          <div className="px-2 py-1 text-sm border border-gray-200 rounded bg-white flex items-center">
+                            <span className="text-xs text-gray-600">
+                              ₹{(item.quantity * item.unitPrice).toFixed(0)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     ))}
                     <button
                       onClick={() => {
                         setFormData({
                           ...formData,
-                          items: [...formData.items, ""],
-                          quantities: [...formData.quantities, 1],
+                          items: [
+                            ...formData.items,
+                            {
+                              product: "",
+                              productId: "",
+                              quantity: 1,
+                              unitPrice: 0,
+                            },
+                          ],
                         });
                       }}
                       className="text-sm text-orange-600 hover:text-orange-700 font-medium"
@@ -202,7 +248,23 @@ export function OrderPipeline() {
                         alert("Please select an outlet");
                         return;
                       }
+                      if (
+                        formData.items.some(
+                          (item) => !item.product || item.unitPrice <= 0,
+                        )
+                      ) {
+                        alert(
+                          "Please fill in all product details with valid prices",
+                        );
+                        return;
+                      }
                       try {
+                        const subtotal = formData.items.reduce(
+                          (sum, item) => sum + item.quantity * item.unitPrice,
+                          0,
+                        );
+                        const tax = Math.round(subtotal * 0.18);
+
                         await addOrder({
                           outletId:
                             state.outlets.find(
@@ -210,19 +272,30 @@ export function OrderPipeline() {
                             )?.id || "",
                           outletName: formData.outletName,
                           status: "placed",
-                          items: formData.items.map((item, i) => ({
-                            product: item,
-                            quantity: formData.quantities[i],
+                          items: formData.items.map((item) => ({
+                            product: item.product,
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            unitPrice: item.unitPrice,
+                            totalPrice: item.quantity * item.unitPrice,
                           })),
-                          total: 0,
+                          subtotal,
+                          tax,
+                          total: subtotal + tax,
                           time: new Date().toLocaleTimeString(),
                         });
                         alert("Order created successfully!");
                         setShowNewOrderForm(false);
                         setFormData({
                           outletName: "",
-                          items: [""],
-                          quantities: [1],
+                          items: [
+                            {
+                              product: "",
+                              productId: "",
+                              quantity: 1,
+                              unitPrice: 0,
+                            },
+                          ],
                         });
                       } catch (err) {
                         alert("Error creating order. Please try again.");
@@ -324,8 +397,31 @@ export function OrderPipeline() {
 
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Total:</span>
+                        <span className="text-gray-500">Items:</span>
                         <span className="font-semibold text-gray-900">
+                          {order.items?.reduce(
+                            (sum, i) => sum + i.quantity,
+                            0,
+                          ) || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Subtotal:</span>
+                        <span className="font-semibold text-gray-900">
+                          ₹{order.subtotal.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Tax:</span>
+                        <span className="font-semibold text-gray-900">
+                          ₹{order.tax.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t border-gray-100">
+                        <span className="text-gray-600 font-semibold">
+                          Total:
+                        </span>
+                        <span className="font-bold text-orange-600">
                           ₹{order.total.toLocaleString()}
                         </span>
                       </div>
