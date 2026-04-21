@@ -14,6 +14,7 @@ import {
   DeliveryVan,
   DashboardData,
   AppState,
+  Invoice,
 } from "./types";
 import {
   inventoryService,
@@ -22,6 +23,7 @@ import {
   salesRepService,
   vanService,
   dashboardService,
+  invoiceService,
 } from "./firebaseService";
 
 interface DataContextType {
@@ -66,6 +68,13 @@ interface DataContextType {
   addVan: (van: Omit<DeliveryVan, "id">) => Promise<void>;
   updateVan: (id: string, updates: Partial<DeliveryVan>) => Promise<void>;
   deleteVan: (id: string) => Promise<void>;
+
+  // Invoice operations
+  refreshInvoices: () => Promise<void>;
+  addInvoice: (invoice: Omit<Invoice, "id">) => Promise<string>;
+  updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
+  updateInvoiceStatus: (id: string, status: string) => Promise<void>;
+  deleteInvoice: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -80,6 +89,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     outlets: [],
     salesReps: [],
     vans: [],
+    invoices: [],
     loading: true,
     error: null,
     lastUpdated: null,
@@ -465,6 +475,93 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     [refreshVans],
   );
 
+  // ============== INVOICES ==============
+  const refreshInvoices = useCallback(async () => {
+    try {
+      const invoices = await invoiceService.getAll();
+      setState((prev) => ({
+        ...prev,
+        invoices,
+        error: null,
+      }));
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : "Failed to load invoices",
+      }));
+    }
+  }, []);
+
+  const addInvoice = useCallback(
+    async (invoice: Omit<Invoice, "id">) => {
+      try {
+        const id = await invoiceService.create(invoice);
+        await refreshInvoices();
+        return id;
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          error: err instanceof Error ? err.message : "Failed to add invoice",
+        }));
+        throw err;
+      }
+    },
+    [refreshInvoices],
+  );
+
+  const updateInvoice = useCallback(
+    async (id: string, updates: Partial<Invoice>) => {
+      try {
+        await invoiceService.update(id, updates);
+        await refreshInvoices();
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          error:
+            err instanceof Error ? err.message : "Failed to update invoice",
+        }));
+        throw err;
+      }
+    },
+    [refreshInvoices],
+  );
+
+  const updateInvoiceStatus = useCallback(
+    async (id: string, status: string) => {
+      try {
+        await invoiceService.updateStatus(id, status);
+        await refreshInvoices();
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          error:
+            err instanceof Error
+              ? err.message
+              : "Failed to update invoice status",
+        }));
+        throw err;
+      }
+    },
+    [refreshInvoices],
+  );
+
+  const deleteInvoice = useCallback(
+    async (id: string) => {
+      try {
+        await invoiceService.delete(id);
+        await refreshInvoices();
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          error:
+            err instanceof Error ? err.message : "Failed to delete invoice",
+        }));
+        throw err;
+      }
+    },
+    [refreshInvoices],
+  );
+
   // ============== REFRESH ALL ==============
   const refreshAll = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true }));
@@ -476,6 +573,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         refreshOutlets(),
         refreshSalesReps(),
         refreshVans(),
+        refreshInvoices(),
       ]);
       setState((prev) => ({
         ...prev,
@@ -543,6 +641,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     addVan,
     updateVan,
     deleteVan,
+
+    refreshInvoices,
+    addInvoice,
+    updateInvoice,
+    updateInvoiceStatus,
+    deleteInvoice,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

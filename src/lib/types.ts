@@ -109,22 +109,39 @@ export interface OutletDelivery {
 }
 
 // Invoice/Billing
+export interface InvoiceItem {
+  product: string;
+  productId: string;
+  cases: number;
+  unitsPerCase: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 export interface Invoice {
   id: string;
   invoiceNumber: string;
   outletId: string;
   outletName: string;
-  orderId: string;
-  items: OrderItem[];
+  outletAddress?: string;
+  outletPhone?: string;
+  orderId?: string;
+  items: InvoiceItem[];
   subtotal: number;
   tax: number;
+  taxRate: number;
   discount?: number;
+  discountType?: "percentage" | "fixed";
   total: number;
+  amountPaid?: number;
+  balanceDue?: number;
   issueDate: string;
   dueDate?: string;
-  status: "draft" | "issued" | "paid" | "overdue";
+  status: "draft" | "issued" | "paid" | "partial" | "overdue";
   notes?: string;
+  terms?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface OrderStage {

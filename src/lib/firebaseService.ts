@@ -26,7 +26,154 @@ import {
   WeeklyRevenue,
   TopFlavor,
   Alert,
+  Invoice,
 } from "./types";
+
+// ============== INVOICE OPERATIONS ==============
+
+export const invoiceService = {
+  // Get all invoices
+  async getAll(): Promise<Invoice[]> {
+    try {
+      const q = query(collection(db, "invoices"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Invoice[];
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      throw error;
+    }
+  },
+
+  // Get invoices by status
+  async getByStatus(status: string): Promise<Invoice[]> {
+    try {
+      const q = query(
+        collection(db, "invoices"),
+        where("status", "==", status),
+        orderBy("createdAt", "desc"),
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Invoice[];
+    } catch (error) {
+      console.error("Error fetching invoices by status:", error);
+      throw error;
+    }
+  },
+
+  // Get invoices by outlet
+  async getByOutlet(outletId: string): Promise<Invoice[]> {
+    try {
+      const q = query(
+        collection(db, "invoices"),
+        where("outletId", "==", outletId),
+        orderBy("createdAt", "desc"),
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Invoice[];
+    } catch (error) {
+      console.error("Error fetching invoices by outlet:", error);
+      throw error;
+    }
+  },
+
+  // Get single invoice
+  async getById(id: string): Promise<Invoice | null> {
+    try {
+      const docSnap = await getDoc(doc(db, "invoices", id));
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Invoice;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      throw error;
+    }
+  },
+
+  // Create invoice
+  async create(invoice: Omit<Invoice, "id">): Promise<string> {
+    try {
+      const docRef = doc(collection(db, "invoices"));
+      await setDoc(docRef, {
+        ...invoice,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      throw error;
+    }
+  },
+
+  // Update invoice
+  async update(id: string, updates: Partial<Invoice>): Promise<void> {
+    try {
+      await updateDoc(doc(db, "invoices", id), {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+      throw error;
+    }
+  },
+
+  // Update invoice status
+  async updateStatus(id: string, status: string): Promise<void> {
+    try {
+      await updateDoc(doc(db, "invoices", id), {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+      throw error;
+    }
+  },
+
+  // Delete invoice
+  async delete(id: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, "invoices", id));
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+      throw error;
+    }
+  },
+
+  // Get next invoice number
+  async getNextInvoiceNumber(): Promise<string> {
+    try {
+      const q = query(
+        collection(db, "invoices"),
+        orderBy("invoiceNumber", "desc"),
+        limit(1),
+      );
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        return "INV-0001";
+      }
+      const lastInvoice = querySnapshot.docs[0].data();
+      const lastNumber = parseInt(
+        lastInvoice.invoiceNumber.split("-")[1] || "0",
+      );
+      return `INV-${String(lastNumber + 1).padStart(4, "0")}`;
+    } catch (error) {
+      console.error("Error getting next invoice number:", error);
+      return `INV-${String(Date.now()).slice(-4)}`;
+    }
+  },
+};
 
 // ============== INVENTORY OPERATIONS ==============
 
