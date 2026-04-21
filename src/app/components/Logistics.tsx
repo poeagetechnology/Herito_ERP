@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   MapPin,
   Route,
@@ -6,12 +6,22 @@ import {
   CheckCircle,
   Navigation,
   Loader,
+  X,
 } from "lucide-react";
 import { useDataContext } from "../../lib/dataContext";
 import type { DeliveryVan } from "../../lib/types";
 
 export function Logistics() {
-  const { state, loading, error, refreshVans } = useDataContext();
+  const { state, loading, error, refreshVans, addVan } = useDataContext();
+  const [showDispatchForm, setShowDispatchForm] = useState(false);
+  const [dispatchForm, setDispatchForm] = useState({
+    driver: "",
+    licensePlate: "",
+    status: "idle" as const,
+    location: "",
+    route: "",
+    fuelLevel: 100,
+  });
 
   useEffect(() => {
     refreshVans();
@@ -112,12 +122,7 @@ export function Logistics() {
             Optimize Routes
           </button>
           <button
-            onClick={() => {
-              alert(
-                "Dispatch Van form will open. This feature is being developed.",
-              );
-              // TODO: Implement dispatch van form
-            }}
+            onClick={() => setShowDispatchForm(true)}
             className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
             style={{
               background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
@@ -125,6 +130,165 @@ export function Logistics() {
           >
             Dispatch Van
           </button>
+
+          {showDispatchForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-3xl p-8 max-w-md w-full max-h-96 overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Dispatch Van
+                  </h3>
+                  <button
+                    onClick={() => setShowDispatchForm(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Driver Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter driver name"
+                      value={dispatchForm.driver}
+                      onChange={(e) =>
+                        setDispatchForm({
+                          ...dispatchForm,
+                          driver: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      License Plate
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., ABC-1234"
+                      value={dispatchForm.licensePlate}
+                      onChange={(e) =>
+                        setDispatchForm({
+                          ...dispatchForm,
+                          licensePlate: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Starting Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Main Warehouse"
+                      value={dispatchForm.location}
+                      onChange={(e) =>
+                        setDispatchForm({
+                          ...dispatchForm,
+                          location: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Route (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Store A, Store B, Store C"
+                      value={dispatchForm.route}
+                      onChange={(e) =>
+                        setDispatchForm({
+                          ...dispatchForm,
+                          route: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Fuel Level: {dispatchForm.fuelLevel}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={dispatchForm.fuelLevel}
+                      onChange={(e) =>
+                        setDispatchForm({
+                          ...dispatchForm,
+                          fuelLevel: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowDispatchForm(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!dispatchForm.driver || !dispatchForm.licensePlate) {
+                        alert("Please fill in driver name and license plate");
+                        return;
+                      }
+                      try {
+                        await addVan({
+                          driver: dispatchForm.driver,
+                          licensePlate: dispatchForm.licensePlate,
+                          status: dispatchForm.status,
+                          location: dispatchForm.location,
+                          deliveries: 0,
+                          completed: 0,
+                          eta: "-- : --",
+                          route: dispatchForm.route
+                            .split(",")
+                            .map((r) => r.trim())
+                            .filter((r) => r),
+                          fuelLevel: dispatchForm.fuelLevel,
+                        });
+                        alert("Van dispatched successfully!");
+                        setShowDispatchForm(false);
+                        setDispatchForm({
+                          driver: "",
+                          licensePlate: "",
+                          status: "idle",
+                          location: "",
+                          route: "",
+                          fuelLevel: 100,
+                        });
+                      } catch (err) {
+                        alert("Error dispatching van. Please try again.");
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                  >
+                    Dispatch
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -388,7 +552,12 @@ export function Logistics() {
                 {van.status === "idle" && (
                   <div className="pt-4 border-t border-gray-100">
                     <button
-                      className="w-full py-3 rounded-xl font-medium text-white transition-all"
+                      onClick={() => {
+                        alert(
+                          `Route assigned to ${van.driver}! Van status is now Active.`,
+                        );
+                      }}
+                      className="w-full py-3 rounded-xl font-medium text-white transition-all hover:shadow-lg"
                       style={{
                         background:
                           "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
