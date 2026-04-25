@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./components/Dashboard";
 import { InventoryHub } from "./components/InventoryHub";
 import { OutletMap } from "./components/OutletMap";
+import { OutletManagement } from "./components/OutletManagement";
 import { OrderPipeline } from "./components/OrderPipeline";
 import { SalesPerformance } from "./components/SalesPerformance";
 import { Logistics } from "./components/Logistics";
 import { OutletDeliveryTracking } from "./components/OutletDeliveryTracking";
 import { ProductManagement } from "./components/ProductManagement";
-import { Billing } from "./components/Billing";
+
 import { MobileView } from "./components/MobileView";
 import { useDataContext } from "../lib/dataContext";
 
@@ -25,6 +26,8 @@ export default function App() {
         return <InventoryHub />;
       case "outlets":
         return <OutletMap />;
+      case "outlet-management":
+        return <OutletManagement />;
       case "orders":
         return <OrderPipeline />;
       case "performance":
@@ -35,8 +38,7 @@ export default function App() {
         return <OutletDeliveryTracking />;
       case "products":
         return <ProductManagement />;
-      case "billing":
-        return <Billing />;
+
       case "mobile":
         return <MobileView />;
       default:

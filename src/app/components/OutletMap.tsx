@@ -1,15 +1,30 @@
 import { useState, useEffect } from "react";
-import { MapPin, Store, Clock, DollarSign, Loader, X } from "lucide-react";
+import {
+  MapPin,
+  Store,
+  Clock,
+  DollarSign,
+  Loader,
+  X,
+  Info,
+  Plus,
+} from "lucide-react";
 import { useDataContext } from "../../lib/dataContext";
 import type { Outlet } from "../../lib/types";
+import { InteractiveMap } from "./figma/InteractiveMap";
+import { getLocationName } from "../../lib/mapUtils";
 
 export function OutletMap() {
   const { state, loading, error, refreshOutlets, addOutlet } = useDataContext();
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
   const [showAddOutlet, setShowAddOutlet] = useState(false);
+  const [selectedMapLocation, setSelectedMapLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [newOutlet, setNewOutlet] = useState({
     name: "",
-    location: { x: 50, y: 50 },
+    location: { lat: 11.0086, lng: 76.9011 }, // Default to Coimbatore
     salesVolume: "medium" as const,
     nextDelivery: "",
     coolerCapacity: 500,
@@ -82,11 +97,12 @@ export function OutletMap() {
         </div>
         <button
           onClick={() => setShowAddOutlet(true)}
-          className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg"
+          className="px-6 py-3 rounded-2xl font-medium text-white transition-all hover:shadow-lg flex items-center gap-2"
           style={{
             background: "linear-gradient(135deg, #FF8A00 0%, #FFB347 100%)",
           }}
         >
+          <Plus className="w-5 h-5" />
           Add Outlet
         </button>
         <div className="flex gap-3">
@@ -107,122 +123,203 @@ export function OutletMap() {
 
       {showAddOutlet && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full max-h-96 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-900">
-                Add New Outlet
+                Add New Outlet with Location
               </h3>
               <button
-                onClick={() => setShowAddOutlet(false)}
+                onClick={() => {
+                  setShowAddOutlet(false);
+                  setSelectedMapLocation(null);
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Interactive Map for Location Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Outlet Name
+                <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-orange-600" />
+                  Select Location on Map *
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g., Downtown Store"
-                  value={newOutlet.name}
-                  onChange={(e) =>
-                    setNewOutlet({ ...newOutlet, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+                <div style={{ height: "400px", overflow: "auto" }}>
+                  <InteractiveMap
+                    outlets={[]}
+                    onOutletSelect={() => {}}
+                    onLocationSelect={(location) => {
+                      setSelectedMapLocation(location);
+                      setNewOutlet({ ...newOutlet, location });
+                    }}
+                    isSelectionMode={true}
+                  />
+                </div>
               </div>
 
+              {/* Basic Information */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  placeholder="Street address"
-                  value={newOutlet.address}
-                  onChange={(e) =>
-                    setNewOutlet({ ...newOutlet, address: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Outlet Information
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Outlet Name *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Downtown Store"
+                      value={newOutlet.name}
+                      onChange={(e) =>
+                        setNewOutlet({ ...newOutlet, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Street address"
+                      value={newOutlet.address}
+                      onChange={(e) =>
+                        setNewOutlet({ ...newOutlet, address: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="Contact number"
+                        value={newOutlet.phone}
+                        onChange={(e) =>
+                          setNewOutlet({ ...newOutlet, phone: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="Email address"
+                        value={newOutlet.email}
+                        onChange={(e) =>
+                          setNewOutlet({ ...newOutlet, email: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Sales Information */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  placeholder="Contact number"
-                  value={newOutlet.phone}
-                  onChange={(e) =>
-                    setNewOutlet({ ...newOutlet, phone: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Sales & Capacity
+                </h4>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sales Volume
+                      </label>
+                      <select
+                        value={newOutlet.salesVolume}
+                        onChange={(e) =>
+                          setNewOutlet({
+                            ...newOutlet,
+                            salesVolume: e.target.value as any,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cooler Capacity (cases)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={newOutlet.coolerCapacity}
+                        onChange={(e) =>
+                          setNewOutlet({
+                            ...newOutlet,
+                            coolerCapacity: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Next Delivery
+                    </label>
+                    <input
+                      type="date"
+                      value={newOutlet.nextDelivery}
+                      onChange={(e) =>
+                        setNewOutlet({
+                          ...newOutlet,
+                          nextDelivery: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sales Volume
-                </label>
-                <select
-                  value={newOutlet.salesVolume}
-                  onChange={(e) =>
-                    setNewOutlet({
-                      ...newOutlet,
-                      salesVolume: e.target.value as any,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cooler Capacity (cases)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newOutlet.coolerCapacity}
-                  onChange={(e) =>
-                    setNewOutlet({
-                      ...newOutlet,
-                      coolerCapacity: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Next Delivery
-                </label>
-                <input
-                  type="date"
-                  value={newOutlet.nextDelivery}
-                  onChange={(e) =>
-                    setNewOutlet({ ...newOutlet, nextDelivery: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-              </div>
+              {/* Location Info */}
+              {selectedMapLocation && (
+                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium">
+                      Location:{" "}
+                      {getLocationName(
+                        selectedMapLocation.lat,
+                        selectedMapLocation.lng,
+                      )}
+                    </p>
+                    <p className="text-xs mt-1">
+                      Coordinates: {selectedMapLocation.lat.toFixed(4)}°N,{" "}
+                      {selectedMapLocation.lng.toFixed(4)}°E
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-8">
               <button
-                onClick={() => setShowAddOutlet(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+                onClick={() => {
+                  setShowAddOutlet(false);
+                  setSelectedMapLocation(null);
+                }}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all font-medium"
               >
                 Cancel
               </button>
@@ -230,6 +327,10 @@ export function OutletMap() {
                 onClick={async () => {
                   if (!newOutlet.name) {
                     alert("Please enter outlet name");
+                    return;
+                  }
+                  if (!selectedMapLocation) {
+                    alert("Please select location on the map");
                     return;
                   }
                   try {
@@ -242,13 +343,15 @@ export function OutletMap() {
                       currentStock: newOutlet.currentStock,
                       owedAmount: newOutlet.owedAmount,
                       phone: newOutlet.phone,
+                      email: newOutlet.email,
                       address: newOutlet.address,
                     });
                     alert("Outlet added successfully!");
                     setShowAddOutlet(false);
+                    setSelectedMapLocation(null);
                     setNewOutlet({
                       name: "",
-                      location: { x: 50, y: 50 },
+                      location: { lat: 11.0086, lng: 76.9011 },
                       salesVolume: "medium",
                       nextDelivery: "",
                       coolerCapacity: 500,
@@ -258,11 +361,12 @@ export function OutletMap() {
                       email: "",
                       address: "",
                     });
+                    refreshOutlets();
                   } catch (err) {
                     alert("Error adding outlet. Please try again.");
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all font-medium"
               >
                 Add Outlet
               </button>
@@ -273,63 +377,27 @@ export function OutletMap() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div
-          className="lg:col-span-2 rounded-3xl p-8 relative overflow-hidden"
+          className="lg:col-span-2 rounded-3xl p-6 overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, #F0FDF4 0%, #DBEAFE 100%)",
+            background: "rgba(255, 255, 255, 0.9)",
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.06)",
-            height: "600px",
           }}
         >
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20px 20px, #94A3B8 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-orange-600" />
+            Distribution Map - Tamil Nadu (Interactive)
+          </h3>
+          <InteractiveMap
+            outlets={state.outlets}
+            selectedOutletId={selectedOutlet?.id}
+            onOutletSelect={(outletId) => {
+              const outlet = state.outlets.find((o) => o.id === outletId);
+              if (outlet) {
+                setSelectedOutlet(outlet);
+              }
             }}
+            isSelectionMode={false}
           />
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-6 px-4 py-3 rounded-2xl bg-white/80 backdrop-blur-sm w-fit">
-              <MapPin className="w-5 h-5 text-orange-500" />
-              <span className="font-semibold text-gray-700">
-                Distribution Zone A
-              </span>
-            </div>
-
-            {state.outlets.map((outlet: Outlet) => (
-              <div
-                key={outlet.id}
-                className="absolute cursor-pointer group"
-                style={{
-                  left: `${outlet.location.x}%`,
-                  top: `${outlet.location.y}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-                onClick={() => setSelectedOutlet(outlet)}
-              >
-                <div className="relative">
-                  <div
-                    className="w-6 h-6 rounded-full border-4 border-white shadow-lg transition-all duration-300 group-hover:scale-150"
-                    style={{
-                      backgroundColor: getVolumeColor(outlet.salesVolume),
-                      boxShadow: `0 0 0 8px ${getVolumeColor(outlet.salesVolume)}20`,
-                    }}
-                  />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl bg-gray-900 text-white text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    {outlet.name}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900" />
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <div className="absolute bottom-4 right-4 px-4 py-3 rounded-2xl bg-white/80 backdrop-blur-sm">
-              <p className="text-sm font-semibold text-gray-900">
-                {state.outlets.length} Active Outlets
-              </p>
-            </div>
-          </div>
         </div>
 
         <div

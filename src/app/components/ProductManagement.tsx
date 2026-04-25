@@ -13,11 +13,13 @@ import { useDataContext } from "../../lib/dataContext";
 import type { Product } from "../../lib/types";
 
 export function ProductManagement() {
-  const { state, loading, error, refreshInventory } = useDataContext();
+  const { state, loading, error, refreshInventory, deleteInventoryItem } =
+    useDataContext();
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -124,6 +126,26 @@ export function ProductManagement() {
     });
     setEditingId(product.id);
     setShowAddProduct(true);
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this product? This action cannot be undone.",
+      )
+    ) {
+      try {
+        setDeletingId(productId);
+        await deleteInventoryItem(productId);
+        alert("Product deleted successfully!");
+        refreshInventory();
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product. Please try again.");
+      } finally {
+        setDeletingId(null);
+      }
+    }
   };
 
   if (loading) {
@@ -637,12 +659,21 @@ export function ProductManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleEditProduct(product)}
-                      className="p-2 rounded-lg text-orange-600 hover:bg-orange-50 transition-all"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="p-2 rounded-lg text-orange-600 hover:bg-orange-50 transition-all"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        disabled={deletingId === product.id}
+                        className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -23,6 +23,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { id: "inventory", icon: Package, label: "Inventory Hub" },
     { id: "outlets", icon: MapPin, label: "Outlets & Map" },
+    { id: "outlet-management", icon: Users, label: "Outlet Management" },
     { id: "orders", icon: ClipboardList, label: "Order Pipeline" },
     { id: "performance", icon: TrendingUp, label: "Sales Performance" },
     { id: "logistics", icon: Truck, label: "Logistics" },

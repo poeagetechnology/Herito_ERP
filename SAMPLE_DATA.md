@@ -102,14 +102,14 @@ Copy and paste this data directly into your Firestore collections to get started
 
 ## Collection: `outlets`
 
-### Document 1: Super Mart Downtown
+### Document 1: Super Mart Downtown (Chennai)
 
 ```json
 {
   "name": "Super Mart Downtown",
   "location": {
-    "x": 25,
-    "y": 30
+    "lat": 13.0827,
+    "lng": 80.2707
   },
   "salesVolume": "high",
   "nextDelivery": "Today, 2:30 PM",
@@ -118,19 +118,19 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 0,
   "phone": "9876543210",
   "email": "supermart@example.com",
-  "address": "123 Main Street, Downtown",
+  "address": "123 Main Street, Downtown Chennai",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```
 
-### Document 2: Green Valley Store
+### Document 2: Green Valley Store (Coimbatore)
 
 ```json
 {
   "name": "Green Valley Store",
   "location": {
-    "x": 65,
-    "y": 20
+    "lat": 11.0086,
+    "lng": 76.9011
   },
   "salesVolume": "medium",
   "nextDelivery": "Tomorrow, 9:00 AM",
@@ -139,19 +139,19 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 340,
   "phone": "9876543211",
   "email": "greenvalley@example.com",
-  "address": "456 Valley Road, Green Valley",
+  "address": "456 Valley Road, Coimbatore",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```
 
-### Document 3: City Plaza Retail
+### Document 3: City Plaza Retail (Madurai)
 
 ```json
 {
   "name": "City Plaza Retail",
   "location": {
-    "x": 45,
-    "y": 60
+    "lat": 9.9252,
+    "lng": 78.1198
   },
   "salesVolume": "high",
   "nextDelivery": "Today, 4:00 PM",
@@ -160,19 +160,19 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 0,
   "phone": "9876543212",
   "email": "cityplaza@example.com",
-  "address": "789 Plaza Avenue, City Center",
+  "address": "789 Plaza Avenue, Madurai",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```
 
-### Document 4: Corner Shop Express
+### Document 4: Corner Shop Express (Trichy)
 
 ```json
 {
   "name": "Corner Shop Express",
   "location": {
-    "x": 80,
-    "y": 70
+    "lat": 10.7905,
+    "lng": 78.7047
   },
   "salesVolume": "low",
   "nextDelivery": "Apr 22, 10:00 AM",
@@ -181,19 +181,19 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 180,
   "phone": "9876543213",
   "email": "cornershop@example.com",
-  "address": "321 Corner Street",
+  "address": "321 Corner Street, Trichy",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```
 
-### Document 5: Healthy Living Market
+### Document 5: Healthy Living Market (Salem)
 
 ```json
 {
   "name": "Healthy Living Market",
   "location": {
-    "x": 15,
-    "y": 75
+    "lat": 11.6643,
+    "lng": 78.146
   },
   "salesVolume": "medium",
   "nextDelivery": "Tomorrow, 1:00 PM",
@@ -202,19 +202,19 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 0,
   "phone": "9876543214",
   "email": "healthymarket@example.com",
-  "address": "555 Health Road, Wellness District",
+  "address": "555 Health Road, Salem",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```
 
-### Document 6: Quick Stop Station
+### Document 6: Quick Stop Station (Vellore)
 
 ```json
 {
   "name": "Quick Stop Station",
   "location": {
-    "x": 55,
-    "y": 40
+    "lat": 12.9689,
+    "lng": 79.1288
   },
   "salesVolume": "high",
   "nextDelivery": "Today, 3:15 PM",
@@ -223,7 +223,7 @@ Copy and paste this data directly into your Firestore collections to get started
   "owedAmount": 520,
   "phone": "9876543215",
   "email": "quickstop@example.com",
-  "address": "999 Quick Lane, Express Zone",
+  "address": "999 Quick Lane, Vellore",
   "createdAt": "2024-04-01T10:00:00Z"
 }
 ```

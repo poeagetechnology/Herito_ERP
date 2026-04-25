@@ -153,8 +153,10 @@ export interface OrderStage {
 
 // Outlet Types
 export interface OutletLocation {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Outlet {
