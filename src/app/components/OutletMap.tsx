@@ -24,15 +24,12 @@ export function OutletMap() {
   } | null>(null);
   const [newOutlet, setNewOutlet] = useState({
     name: "",
+    locationName: "",
     location: { lat: 11.0086, lng: 76.9011 }, // Default to Coimbatore
-    salesVolume: "medium" as const,
-    nextDelivery: "",
-    coolerCapacity: 500,
-    currentStock: 0,
-    owedAmount: 0,
     phone: "",
     email: "",
     address: "",
+    refillBreakDays: 7 as 7 | 14 | 28,
   });
 
   useEffect(() => {
@@ -151,8 +148,9 @@ export function OutletMap() {
                     outlets={[]}
                     onOutletSelect={() => {}}
                     onLocationSelect={(location) => {
+                      const locationName = getLocationName(location.lat, location.lng);
                       setSelectedMapLocation(location);
-                      setNewOutlet({ ...newOutlet, location });
+                      setNewOutlet({ ...newOutlet, location, locationName });
                     }}
                     isSelectionMode={true}
                   />
@@ -175,6 +173,24 @@ export function OutletMap() {
                       value={newOutlet.name}
                       onChange={(e) =>
                         setNewOutlet({ ...newOutlet, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Gandhipuram, Coimbatore"
+                      value={newOutlet.locationName}
+                      onChange={(e) =>
+                        setNewOutlet({
+                          ...newOutlet,
+                          locationName: e.target.value,
+                        })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
@@ -225,69 +241,25 @@ export function OutletMap() {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Sales Information */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                  Sales & Capacity
-                </h4>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Sales Volume
-                      </label>
-                      <select
-                        value={newOutlet.salesVolume}
-                        onChange={(e) =>
-                          setNewOutlet({
-                            ...newOutlet,
-                            salesVolume: e.target.value as any,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cooler Capacity (cases)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={newOutlet.coolerCapacity}
-                        onChange={(e) =>
-                          setNewOutlet({
-                            ...newOutlet,
-                            coolerCapacity: parseInt(e.target.value),
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Next Delivery
+                      Refill Break *
                     </label>
-                    <input
-                      type="date"
-                      value={newOutlet.nextDelivery}
+                    <select
+                      value={newOutlet.refillBreakDays}
                       onChange={(e) =>
                         setNewOutlet({
                           ...newOutlet,
-                          nextDelivery: e.target.value,
+                          refillBreakDays: Number(e.target.value) as 7 | 14 | 28,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
+                    >
+                      <option value={7}>7 Days</option>
+                      <option value={14}>14 Days</option>
+                      <option value={28}>28 Days</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -329,6 +301,10 @@ export function OutletMap() {
                     alert("Please enter outlet name");
                     return;
                   }
+                  if (!newOutlet.locationName) {
+                    alert("Please enter location");
+                    return;
+                  }
                   if (!selectedMapLocation) {
                     alert("Please select location on the map");
                     return;
@@ -336,12 +312,14 @@ export function OutletMap() {
                   try {
                     await addOutlet({
                       name: newOutlet.name,
+                      locationName: newOutlet.locationName,
                       location: newOutlet.location,
-                      salesVolume: newOutlet.salesVolume,
-                      nextDelivery: newOutlet.nextDelivery,
-                      coolerCapacity: newOutlet.coolerCapacity,
-                      currentStock: newOutlet.currentStock,
-                      owedAmount: newOutlet.owedAmount,
+                      salesVolume: "medium",
+                      nextDelivery: "",
+                      coolerCapacity: 500,
+                      currentStock: 0,
+                      owedAmount: 0,
+                      refillBreakDays: newOutlet.refillBreakDays,
                       phone: newOutlet.phone,
                       email: newOutlet.email,
                       address: newOutlet.address,
@@ -351,15 +329,12 @@ export function OutletMap() {
                     setSelectedMapLocation(null);
                     setNewOutlet({
                       name: "",
+                      locationName: "",
                       location: { lat: 11.0086, lng: 76.9011 },
-                      salesVolume: "medium",
-                      nextDelivery: "",
-                      coolerCapacity: 500,
-                      currentStock: 0,
-                      owedAmount: 0,
                       phone: "",
                       email: "",
                       address: "",
+                      refillBreakDays: 7,
                     });
                     refreshOutlets();
                   } catch (err) {

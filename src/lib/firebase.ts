@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -60,7 +60,11 @@ let auth;
 
 try {
   app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  db = initializeFirestore(app, {
+    // More resilient transport for networks/browsers that fail on HTTP/3 QUIC.
+    experimentalAutoDetectLongPolling: true,
+    useFetchStreams: false,
+  });
   auth = getAuth(app);
 
   // Initialize analytics only in production

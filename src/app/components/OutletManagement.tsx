@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import {
-  Store,
   Plus,
   Edit2,
   Trash2,
   X,
   Phone,
   Mail,
-  MapPin,
   AlertCircle,
   Loader,
 } from "lucide-react";
@@ -30,25 +28,21 @@ export function OutletManagement() {
   const [filterVolume, setFilterVolume] = useState("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const salesVolumes = ["high", "medium", "low"] as const;
 
   const [formData, setFormData] = useState({
     name: "",
+    locationName: "",
     phone: "",
     email: "",
     address: "",
-    coolerCapacity: 500,
-    currentStock: 0,
-    owedAmount: 0,
-    salesVolume: "medium" as "high" | "medium" | "low",
-    nextDelivery: "",
-    location: { x: 50, y: 50 },
+    refillBreakDays: 7 as 7 | 14 | 28,
+    location: { lat: 11.0086, lng: 76.9011 },
   });
 
   useEffect(() => {
     refreshOutlets();
   }, [refreshOutlets]);
-
-  const salesVolumes = ["high", "medium", "low"];
 
   const filteredOutlets = state.outlets.filter(
     (outlet) =>
@@ -61,15 +55,12 @@ export function OutletManagement() {
   const resetForm = () => {
     setFormData({
       name: "",
+      locationName: "",
       phone: "",
       email: "",
       address: "",
-      coolerCapacity: 500,
-      currentStock: 0,
-      owedAmount: 0,
-      salesVolume: "medium",
-      nextDelivery: "",
-      location: { x: 50, y: 50 },
+      refillBreakDays: 7,
+      location: { lat: 11.0086, lng: 76.9011 },
     });
     setEditingId(null);
   };
@@ -79,18 +70,39 @@ export function OutletManagement() {
       alert("Please fill in outlet name");
       return;
     }
-    if (formData.coolerCapacity <= 0) {
-      alert("Cooler capacity must be greater than 0");
+    if (!formData.locationName) {
+      alert("Please fill in location");
       return;
     }
 
     try {
       setIsSaving(true);
       if (editingId) {
-        await updateOutlet(editingId, formData);
+        await updateOutlet(editingId, {
+          name: formData.name,
+          locationName: formData.locationName,
+          address: formData.address,
+          phone: formData.phone,
+          email: formData.email,
+          refillBreakDays: formData.refillBreakDays,
+          location: formData.location,
+        });
         alert("Outlet updated successfully!");
       } else {
-        await addOutlet(formData);
+        await addOutlet({
+          name: formData.name,
+          locationName: formData.locationName,
+          address: formData.address,
+          phone: formData.phone,
+          email: formData.email,
+          refillBreakDays: formData.refillBreakDays,
+          location: formData.location,
+          salesVolume: "medium",
+          nextDelivery: "",
+          coolerCapacity: 500,
+          currentStock: 0,
+          owedAmount: 0,
+        });
         alert("Outlet added successfully!");
       }
       setShowAddOutlet(false);
@@ -107,15 +119,12 @@ export function OutletManagement() {
   const handleEditOutlet = (outlet: Outlet) => {
     setFormData({
       name: outlet.name,
+      locationName: outlet.locationName || "",
       phone: outlet.phone || "",
       email: outlet.email || "",
       address: outlet.address || "",
-      coolerCapacity: outlet.coolerCapacity,
-      currentStock: outlet.currentStock,
-      owedAmount: outlet.owedAmount,
-      salesVolume: outlet.salesVolume,
-      nextDelivery: outlet.nextDelivery,
-      location: outlet.location,
+      refillBreakDays: outlet.refillBreakDays || 7,
+      location: outlet.location || { lat: 11.0086, lng: 76.9011 },
     });
     setEditingId(outlet.id);
     setShowAddOutlet(true);
@@ -232,13 +241,7 @@ export function OutletManagement() {
               </div>
 
               <div className="space-y-4">
-                {/* Basic Information */}
-                <div className="pt-4 border-t border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Store className="w-5 h-5 text-orange-600" />
-                    Basic Information
-                  </h4>
-
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Outlet Name *
@@ -254,56 +257,20 @@ export function OutletManagement() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Sales Volume
-                      </label>
-                      <select
-                        value={formData.salesVolume}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            salesVolume: e.target.value as
-                              | "high"
-                              | "medium"
-                              | "low",
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        {salesVolumes.map((vol) => (
-                          <option key={vol} value={vol}>
-                            {vol.charAt(0).toUpperCase() + vol.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Next Delivery
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.nextDelivery}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            nextDelivery: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Gandhipuram, Coimbatore"
+                      value={formData.locationName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, locationName: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
                   </div>
-                </div>
-
-                {/* Contact Information */}
-                <div className="pt-4 border-t border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Phone className="w-5 h-5 text-orange-600" />
-                    Contact Information
-                  </h4>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -320,7 +287,7 @@ export function OutletManagement() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Phone
@@ -350,69 +317,24 @@ export function OutletManagement() {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Inventory & Capacity */}
-                <div className="pt-4 border-t border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-orange-600" />
-                    Inventory & Capacity
-                  </h4>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cooler Capacity (units) *
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={formData.coolerCapacity}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            coolerCapacity: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Stock
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.currentStock}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            currentStock: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Amount Owed (₹)
+                      Refill Break *
                     </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.owedAmount}
+                    <select
+                      value={formData.refillBreakDays}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          owedAmount: parseFloat(e.target.value) || 0,
+                          refillBreakDays: Number(e.target.value) as 7 | 14 | 28,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
+                    >
+                      <option value={7}>7 Days</option>
+                      <option value={14}>14 Days</option>
+                      <option value={28}>28 Days</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -552,7 +474,7 @@ export function OutletManagement() {
                       </p>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {outlet.address || "N/A"}
+                      {outlet.locationName || outlet.address || "N/A"}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       <div className="space-y-1">

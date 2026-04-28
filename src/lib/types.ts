@@ -163,11 +163,13 @@ export interface Outlet {
   id: string;
   name: string;
   location: OutletLocation;
+  locationName?: string;
   salesVolume: "high" | "medium" | "low";
   nextDelivery: string;
   coolerCapacity: number;
   currentStock: number;
   owedAmount: number;
+  refillBreakDays?: 7 | 14 | 28;
   phone?: string;
   email?: string;
   address?: string;
