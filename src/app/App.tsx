@@ -10,6 +10,7 @@ import { SalesPerformance } from "./components/SalesPerformance";
 import { Logistics } from "./components/Logistics";
 import { OutletDeliveryTracking } from "./components/OutletDeliveryTracking";
 import { ProductManagement } from "./components/ProductManagement";
+import { BillingInvoices } from "./components/BillingInvoices";
 
 import { MobileView } from "./components/MobileView";
 import { useDataContext } from "../lib/dataContext";
@@ -38,6 +39,8 @@ export default function App() {
         return <OutletDeliveryTracking />;
       case "products":
         return <ProductManagement />;
+      case "billing":
+        return <BillingInvoices />;
 
       case "mobile":
         return <MobileView />;
